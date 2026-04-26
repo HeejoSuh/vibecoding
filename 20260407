@@ -1,1 +1,125 @@
+당신은 Windows 보안 전문가입니다.
+아래 환경 정보를 바탕으로 이 PC의 보안 취약점을 점검하고,
+결과를 Markdown 보고서 형식으로 작성해주세요.
 
+---
+
+## 점검 대상 환경
+
+- OS: Windows {{버전}} (예: Windows 11 Pro 23H2)
+- 사용자 유형: {{관리자 / 일반 사용자}}
+- 도메인 가입 여부: {{Yes / No}}
+- 주요 사용 목적: {{업무용 / 개발용 / 일반 사용}}
+- 네트워크 환경: {{사내망 / 가정용 / 공용 Wi-Fi 등}}
+
+---
+
+## 점검 범위
+
+다음 세 가지 영역을 점검합니다.
+
+### 1. 계정/권한 관리
+
+아래 항목을 PowerShell 명령으로 직접 확인하고 결과를 분석하세요.
+
+점검 항목:
+- 현재 로그인 계정의 권한 수준 (관리자 여부)
+- 불필요한 로컬 관리자 계정 존재 여부
+- Guest 계정 활성화 여부
+- 비밀번호 정책 설정 상태 (최소 길이, 복잡성 요구, 만료 주기)
+- 마지막 로그인 기록 및 실패한 로그인 시도
+
+사용할 명령어 예시:
+  net user
+  net localgroup administrators
+  net accounts
+  Get-LocalUser | Select Name, Enabled, LastLogon, PasswordRequired
+
+### 2. 네트워크 설정
+
+아래 항목을 점검하세요.
+
+점검 항목:
+- 현재 열려 있는 포트 목록 (LISTEN 상태)
+- 알 수 없는 외부 연결 여부
+- Windows 방화벽 활성화 상태
+- 공유 폴더 목록 및 익명 접근 허용 여부
+- RDP(원격 데스크톱) 활성화 여부
+- DNS 설정 및 변조 여부
+
+사용할 명령어 예시:
+  netstat -ano
+  Get-NetFirewallProfile | Select Name, Enabled
+  net share
+  reg query "HKLM\System\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections
+  ipconfig /all
+
+### 3. 소프트웨어 취약점
+
+아래 항목을 점검하세요.
+
+점검 항목:
+- Windows Update 최신 패치 적용 여부
+- 설치된 소프트웨어 목록 및 오래된 버전 탐지
+- 자동 실행(Startup) 등록 프로그램 목록
+- 의심스러운 예약 작업(Scheduled Task) 존재 여부
+- Windows Defender / 백신 상태 및 최신 정의 파일 여부
+- UAC(사용자 계정 컨트롤) 설정 수준
+
+사용할 명령어 예시:
+  Get-WindowsUpdate (또는 wuauclt /detectnow)
+  Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select DisplayName, DisplayVersion
+  Get-ScheduledTask | Where-Object {$_.State -ne "Disabled"}
+  Get-MpComputerStatus
+  reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA
+
+---
+
+## 출력 형식
+
+점검 결과를 아래 Markdown 구조로 작성해주세요.
+
+# Windows 보안 취약점 점검 보고서
+
+## 요약
+- 점검 일시: (자동 기입)
+- 점검 대상: {{PC명 또는 사용자명}}
+- 총 발견 취약점: X건 (위험 N / 주의 N / 양호 N)
+
+## 영역별 점검 결과
+
+### 1. 계정/권한 관리
+
+| 항목 | 현재 상태 | 위험도 | 권고 조치 |
+|------|-----------|--------|-----------|
+| ...  | ...       | 위험/주의/양호 | ... |
+
+### 2. 네트워크 설정
+
+| 항목 | 현재 상태 | 위험도 | 권고 조치 |
+|------|-----------|--------|-----------|
+
+### 3. 소프트웨어 취약점
+
+| 항목 | 현재 상태 | 위험도 | 권고 조치 |
+|------|-----------|--------|-----------|
+
+## 우선 조치 항목 (Top 5)
+
+위험도가 높은 항목을 우선순위 순으로 5개 나열하고,
+각각 구체적인 수정 방법(명령어 또는 UI 경로 포함)을 제시하세요.
+
+## 참고 기준
+
+점검 기준은 다음을 따릅니다.
+- KISA 주요정보통신기반시설 기술적 취약점 분석·평가 방법 상세가이드
+- CIS Benchmark for Windows
+- Microsoft Security Baseline
+
+---
+
+## 주의사항
+
+- 점검은 읽기 전용 명령어만 사용하고, 시스템을 변경하지 마세요
+- 관리자 권한이 필요한 명령어는 "관리자 권한으로 실행" 후 사용하세요
+- 점검 결과는 내부 보안 담당자와 공유 전 민감 정보(계정명 등)를 마스킹하세요
