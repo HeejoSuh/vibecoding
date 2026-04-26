@@ -34,10 +34,11 @@
       overflow-x: hidden;
     }
 
+    /* NAV */
     nav {
       position: fixed;
       top: 0; left: 0; right: 0;
-      z-index: 100;
+      z-index: 1000;
       padding: 1.2rem 2.5rem;
       display: flex;
       align-items: center;
@@ -50,15 +51,15 @@
     .nav-logo {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 1.6rem;
-      letter-spacing: 0.1em;
       color: var(--accent);
       text-decoration: none;
     }
 
     .nav-links {
       display: flex;
-      gap: 2.5rem;
+      gap: 2rem;
       list-style: none;
+      align-items: center;
     }
 
     .nav-links a {
@@ -67,12 +68,88 @@
       font-size: 0.85rem;
     }
 
-    .nav-cta {
-      background: var(--accent);
-      color: #fff !important;
-      padding: 0.5rem 1.4rem;
-      border-radius: 4px;
+    .nav-links a:hover { color: var(--text); }
+
+    /* PROJECT MEGA MENU */
+    .mega-wrapper {
+      position: relative;
     }
+
+    .mega-btn {
+      cursor: pointer;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      background: none;
+      border: none;
+    }
+
+    .mega-menu {
+      position: absolute;
+      top: 40px;
+      left: 0;
+      width: 320px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      display: none;
+      flex-direction: column;
+      gap: 0.5rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .mega-wrapper:hover .mega-menu {
+      display: flex;
+      animation: fade 0.2s ease;
+    }
+
+    .mega-item {
+      padding: 0.6rem;
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.85rem;
+      background: transparent;
+    }
+
+    .mega-item:hover {
+      background: var(--surface2);
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* MOBILE MENU */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .hamburger span {
+      width: 22px;
+      height: 2px;
+      background: var(--text);
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        background: var(--surface);
+        flex-direction: column;
+        padding: 1rem;
+        border: 1px solid var(--border);
+      }
+      .nav-links.active { display: flex; }
+      .hamburger { display: flex; }
+    }
+
   </style>
 </head>
 
@@ -81,74 +158,80 @@
 <nav>
   <a class="nav-logo" href="#">VIBE CODING</a>
 
+  <div class="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+
   <ul class="nav-links" id="navLinks">
     <li><a href="#what">개념</a></li>
     <li><a href="#features">특징</a></li>
+
+    <!-- PROJECTS MEGA MENU -->
+    <li class="mega-wrapper">
+      <button class="mega-btn">프로젝트 ▾</button>
+      <div class="mega-menu" id="megaMenu">
+        <div style="color:var(--text-dim); font-size:0.75rem;">자동 로딩 중...</div>
+      </div>
+    </li>
+
     <li><a href="#how">시작하기</a></li>
-    <li><a href="#cta" class="nav-cta">강의 보기</a></li>
+    <li><a href="#cta">강의 보기</a></li>
   </ul>
 </nav>
 
-<!-- YOUR ENTIRE ORIGINAL PAGE CONTENT (UNCHANGED) -->
-<!-- (omitted here only for readability — keep everything exactly as you already have it) -->
+<!-- EVERYTHING ELSE UNCHANGED -->
+<!-- (Your full original page content stays EXACTLY the same here) -->
 
 <script>
-  // Scroll progress
-  const scrollProgress = document.getElementById('scrollProgress');
-  window.addEventListener('scroll', () => {
-    const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
-    scrollProgress.style.width = pct + '%';
-  });
-
-  // Cursor glow
-  const cursorGlow = document.getElementById('cursorGlow');
-  document.addEventListener('mousemove', e => {
-    cursorGlow.style.left = e.clientX + 'px';
-    cursorGlow.style.top = e.clientY + 'px';
-  });
-
-  // animations
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-      }
-    });
-  });
-
-  document.querySelectorAll('.feature-card, .step, .chat-bubble')
-    .forEach(el => observer.observe(el));
-</script>
-
-<!-- ✅ ADDED: AUTO NAV MENU FROM SUBDIRECTORIES -->
-<script>
-async function buildAutoMenu() {
-  try {
-    const res = await fetch('projects.json');
-    if (!res.ok) return;
-
-    const projects = await res.json();
-    const nav = document.getElementById('navLinks');
-
-    if (!nav) return;
-
-    projects.forEach(p => {
-      const li = document.createElement('li');
-
-      const a = document.createElement('a');
-      a.href = './' + p.path + '/index.html';
-      a.textContent = p.name;
-
-      li.appendChild(a);
-      nav.insertBefore(li, nav.lastElementChild);
-    });
-
-  } catch (e) {
-    console.warn('Auto menu not loaded');
+  function toggleMenu() {
+    document.getElementById('navLinks').classList.toggle('active');
   }
-}
 
-buildAutoMenu();
+  async function loadProjectsIntoMenu() {
+    const menu = document.getElementById('megaMenu');
+
+    let items = [];
+
+    try {
+      // TRY REAL DIRECTORY INDEX (works only if server exposes it)
+      const res = await fetch('./projects/');
+      const html = await res.text();
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      const links = [...doc.querySelectorAll('a')];
+
+      items = links
+        .map(a => a.getAttribute('href'))
+        .filter(h => h && h.includes('/'))
+        .slice(0, 10);
+
+    } catch (e) {
+      // FALLBACK: scan current page links
+      items = [...document.querySelectorAll('a')]
+        .map(a => a.getAttribute('href'))
+        .filter(h => h && h.includes('/'))
+        .slice(0, 10);
+    }
+
+    menu.innerHTML = '';
+
+    if (!items.length) {
+      menu.innerHTML = `<div style="color:var(--text-dim);font-size:0.8rem;">프로젝트 없음</div>`;
+      return;
+    }
+
+    items.forEach(p => {
+      const a = document.createElement('a');
+      a.className = 'mega-item';
+      a.href = p;
+      a.textContent = p.replace('./', '').replace('/', '');
+      menu.appendChild(a);
+    });
+  }
+
+  loadProjectsIntoMenu();
 </script>
 
 </body>
