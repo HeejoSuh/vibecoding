@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SQL Injection Learning Lab</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<header class="hero">
+  <h1>SQL Injection Learning Lab</h1>
+  <p>브라우저에서 안전하게 SQL Injection 개념을 학습하는 시뮬레이터</p>
+  <button id="startBtn">실습 시작</button>
+  <p class="badge">⚠ Simulation Only · Mock Data Only · No Real DB</p>
+</header>
+
+<section class="guardrail">
+  <h2>안전 가드레일</h2>
+  <ul>
+    <li>실제 서버 및 DB 연결 없음</li>
+    <li>모든 결과는 시뮬레이션</li>
+    <li>입력값은 실행되지 않음 (규칙 기반 판정)</li>
+    <li>민감 데이터 없음 (mock data only)</li>
+  </ul>
+</section>
+
+<section class="lab">
+  <h2>실습 콘솔</h2>
+
+  <div class="mode-toggle">
+    <label>
+      <input type="radio" name="mode" value="vulnerable" checked>
+      취약 모드
+    </label>
+    <label>
+      <input type="radio" name="mode" value="safe">
+      안전 모드
+    </label>
+  </div>
+
+  <div class="input-area">
+    <input id="userInput" placeholder="입력값을 넣어보세요 (예: ' OR 1=1 --)" />
+    <div class="payloads">
+      <button data-payload="' OR '1'='1">로그인 우회</button>
+      <button data-payload="' UNION SELECT NULL, username FROM users --">UNION</button>
+      <button data-payload="' AND 1=2 --">조건 거짓</button>
+    </div>
+  </div>
+
+  <div class="queries">
+    <div>
+      <h3>Unsafe Query</h3>
+      <pre id="unsafeQuery"></pre>
+    </div>
+    <div>
+      <h3>Safe Query (Parameterized)</h3>
+      <pre id="safeQuery"></pre>
+    </div>
+  </div>
+
+  <div class="result">
+    <h3>결과</h3>
+    <div id="resultText"></div>
+    <table id="resultTable"></table>
+  </div>
+</section>
+
+<section class="patterns">
+  <h2>공격 패턴</h2>
+  <ul>
+    <li><b>Tautology:</b> 항상 참 조건</li>
+    <li><b>Comment:</b> 뒤 조건 무시 (--)</li>
+    <li><b>UNION:</b> 다른 테이블 데이터 결합</li>
+    <li><b>Stacked Query:</b> 여러 쿼리 실행 시도</li>
+  </ul>
+</section>
+
+<section class="defense">
+  <h2>방어 가이드</h2>
+  <ul>
+    <li>Prepared Statement 사용</li>
+    <li>입력값 검증 (Whitelist)</li>
+    <li>최소 권한 원칙</li>
+    <li>에러 메시지 숨김</li>
+    <li>로깅 및 모니터링</li>
+  </ul>
+</section>
+
+<section class="compliance">
+  <h2>프롬프트 제약 반영</h2>
+  <ul>
+    <li>모든 데이터는 JS mock data</li>
+    <li>정규식 기반 시뮬레이션</li>
+    <li>입력 정규화 및 escape 처리</li>
+    <li>실제 SQL 실행 없음</li>
+    <li>저장 기능 없음</li>
+  </ul>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>
